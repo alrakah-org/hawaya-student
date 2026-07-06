@@ -756,7 +756,7 @@
     const wrap = document.getElementById('leaderboardScroll');
     wrap.innerHTML = '<p class="lb-empty">جاري التحميل...</p>';
     try {
-      const data = await callAppsScript({ action: 'getLeaderboard' });
+      const data = await callAppsScript({ action: 'getLeaderboard', stage: currentStudentStage });
       if (!data.success) { wrap.innerHTML = '<p class="lb-empty">تعذر تحميل الترتيب</p>'; return; }
       renderLeaderboard(data.leaderboard);
     } catch (_) {
