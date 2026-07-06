@@ -435,7 +435,7 @@
 
         <div class="section-card">
           <div class="section-title">📅 إنجاز الأسبوع</div>
-          <div class="section-sub">اختر واحد فقط — يبقى ثابت لين الأحد الجاي</div>
+          <div class="section-sub">كل إنجاز يُختار مرة واحدة بالأسبوع — يتجدد الأحد الجاي</div>
           <div id="weeklyAchievementsList"></div>
         </div>
 
@@ -776,20 +776,19 @@
     `).join('');
   }
 
-  function renderWeeklyAchievements(weekly, chosenKey) {
+  function renderWeeklyAchievements(weekly) {
     const wrap = document.getElementById('weeklyAchievementsList');
-    if (chosenKey) {
-      const chosen = weekly.find((w) => w.key === chosenKey);
-      wrap.innerHTML = `<div class="achievement-row done"><span class="achievement-label">✅ اخترت هذا الأسبوع: ${chosen ? chosen.label : chosenKey}</span></div>`;
-      return;
-    }
-    wrap.innerHTML = weekly.map((a) => `
+    wrap.innerHTML = weekly.map((a) => {
+      if (a.done) {
+        return `<div class="achievement-row done"><span class="achievement-label">✅ ${a.label} — مأخوذ هذا الأسبوع</span></div>`;
+      }
+      return `
       <label class="achievement-row">
-        <input type="radio" name="weeklyAchievement" class="achievement-checkbox" value="${a.key}">
+        <input type="checkbox" class="achievement-checkbox" data-weekly-key="${a.key}">
         <span class="achievement-label">${a.label}</span>
         <span class="achievement-points">+${a.points}</span>
-      </label>
-    `).join('');
+      </label>`;
+    }).join('');
   }
 
   const YOUNG_GRADES = ['أول ابتدائي', 'ثاني ابتدائي', 'ثالث ابتدائي', 'رابع ابتدائي'];
@@ -822,7 +821,7 @@
       document.getElementById('achievementsLockedCard').style.display = 'none';
       document.getElementById('achievementsContent').style.display = 'block';
       renderDailyAchievements(data.daily);
-      renderWeeklyAchievements(data.weekly, data.weeklyChosen);
+      renderWeeklyAchievements(data.weekly);
     } catch (_) {
       // تجاهل بصمت — السجل والصفحات الثانية تبقى تعمل
     }
@@ -833,11 +832,10 @@
     if (!session) return;
 
     const dailyKeys = Array.from(document.querySelectorAll('.achievement-checkbox[data-daily-key]:checked')).map((el) => el.dataset.dailyKey);
-    const weeklyEl = document.querySelector('input[name="weeklyAchievement"]:checked');
-    const weeklyKey = weeklyEl ? weeklyEl.value : null;
+    const weeklyKeys = Array.from(document.querySelectorAll('.achievement-checkbox[data-weekly-key]:checked')).map((el) => el.dataset.weeklyKey);
     const msgEl = document.getElementById('achievementsMsg');
 
-    if (!dailyKeys.length && !weeklyKey) {
+    if (!dailyKeys.length && !weeklyKeys.length) {
       msgEl.style.color = 'var(--error)';
       msgEl.textContent = 'اختر إنجاز واحد على الأقل';
       return;
@@ -847,7 +845,7 @@
     btn.disabled = true; btn.textContent = 'جاري التأكيد...'; msgEl.textContent = '';
 
     try {
-      const result = await callAppsScript({ action: 'submitAchievements', id: session.id, dailyKeys: dailyKeys, weeklyKey: weeklyKey });
+      const result = await callAppsScript({ action: 'submitAchievements', id: session.id, dailyKeys: dailyKeys, weeklyKeys: weeklyKeys });
       if (result.success) {
         msgEl.style.color = 'var(--success)';
         msgEl.textContent = result.pointsAdded > 0
