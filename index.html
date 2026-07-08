@@ -655,7 +655,7 @@
     const wrap = document.getElementById('rewardsList');
     wrap.innerHTML = '<p class="lb-empty">جاري التحميل...</p>';
     try {
-      const data = await callAppsScript({ action: 'getRewards' });
+      const data = await callAppsScript({ action: 'getRewards', group: getRewardGroupForStage(currentStudentStage) });
       renderRewards(data.success ? data.rewards : []);
     } catch (_) {
       wrap.innerHTML = '<p class="lb-empty">تعذر تحميل الجوائز</p>';
@@ -793,6 +793,14 @@
 
   const YOUNG_GRADES = ['أول ابتدائي', 'ثاني ابتدائي', 'ثالث ابتدائي', 'رابع ابتدائي'];
   let currentStudentStage = '';
+
+  // مجموعة جوائز الطالب حسب مرحلته (نفس تقسيم الخادم)
+  function getRewardGroupForStage(stage) {
+    if (['أول ابتدائي', 'ثاني ابتدائي', 'ثالث ابتدائي', 'رابع ابتدائي'].indexOf(stage) !== -1) return 'ابتدائي_صغار';
+    if (['خامس ابتدائي', 'سادس ابتدائي'].indexOf(stage) !== -1) return 'ابتدائي_كبار';
+    if (stage.indexOf('متوسط') !== -1) return 'متوسط';
+    return 'ثانوي';
+  }
 
   async function loadAchievements() {
     const session = getSession();
