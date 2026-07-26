@@ -154,35 +154,9 @@
     font-family:'Baloo Bhaijaan 2', sans-serif;font-weight:700;font-size:1.15rem;color:var(--indigo);margin:0 0 6px;
     display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;
   }
-  .lb-your-rank{font-family:'Almarai', sans-serif;font-weight:700;font-size:.72rem;color:var(--text-muted);}
   .section-sub{color:var(--text-muted);font-size:.86rem;margin:0 0 16px;line-height:1.6;}
 
-  /* قائمة العشرة الأوائل */
-  .leaderboard-scroll{
-    display:flex;gap:12px;overflow-x:auto;padding:6px 2px 10px;
-    scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;
-  }
-  .leaderboard-scroll::-webkit-scrollbar{height:0;}
-  .leader-card{
-    flex:0 0 84px;scroll-snap-align:start;text-align:center;
-    background:#FBFAFD;border:2px solid #EFEAF8;border-radius:16px;padding:10px 6px;
-  }
-  .leader-rank{
-    font-family:'Baloo Bhaijaan 2', sans-serif;font-weight:800;font-size:.74rem;color:#fff;
-    background:linear-gradient(95deg, var(--blue), var(--violet));border-radius:999px;
-    display:inline-block;padding:2px 9px;margin-bottom:6px;
-  }
-  .leader-rank.top1{background:linear-gradient(95deg, var(--sun), #FFD976);color:#5A4300;}
-  .leader-photo{
-    width:50px;height:50px;border-radius:12px;margin:0 auto 6px;background-size:cover;background-position:center;
-    background-color:#EFEAF8;display:flex;align-items:center;justify-content:center;font-size:1.2rem;border:2px solid #fff;
-  }
-  .leader-name{font-size:.72rem;font-weight:800;color:var(--indigo);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .leader-stage{font-size:.64rem;color:var(--text-muted);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
-  .lb-empty{color:var(--text-muted);font-size:.82rem;padding:6px 2px;}
-
   /* الإعلانات والجوائز — صف عام */
-  /* الإعلان الأحدث — يطلع بحجم أكبر وضوحًا، يضغط عليه لفتح الصورة كاملة */
   .announcement-featured{
     border-radius:18px;overflow:hidden;margin-bottom:14px;background:#FBFAFD;border:2px solid #EFEAF8;
   }
@@ -238,7 +212,6 @@
   .student-id-meta{display:flex;gap:16px;align-items:center;}
   .student-id-id{font-size:.82rem;font-weight:800;color:#1A1430;}
   .student-id-id span{font-size:.82rem;font-weight:800;color:#1A1430;margin-right:2px;}
-  .student-id-rank{font-size:.82rem;font-weight:800;color:#1A1430;}
 
   /* المعلومات / الرصيد */
   .balance-box{text-align:center;padding:10px 0 4px;}
@@ -363,7 +336,7 @@
   </div>
 </div>
 
-<!-- نافذة شرح التثبيت العامة (أندرويد/متصفحات أخرى لو لم يدعم التثبيت التلقائي) -->
+<!-- نافذة شرح التثبيت العامة -->
 <div id="genericInstallOverlay" class="ios-install-overlay hidden">
   <div class="ios-install-card">
     <h3>📲 تثبيت التطبيق</h3>
@@ -373,7 +346,7 @@
   </div>
 </div>
 
-<!-- نافذة تكبير صورة الإعلان — اضغط بأي مكان للإغلاق -->
+<!-- نافذة تكبير صورة الإعلان -->
 <div id="imageLightbox" class="ios-install-overlay hidden">
   <img id="lightboxImg" style="max-width:100%;max-height:88vh;border-radius:16px;display:block;" src="" alt="">
 </div>
@@ -396,9 +369,11 @@
         <div id="announcementsList"></div>
       </div>
 
-      <div class="section-card">
-        <div class="section-title">🔥 العشرة الأوائل <span class="lb-your-rank" id="lbYourRank"></span></div>
-        <div id="leaderboardScroll" class="leaderboard-scroll"></div>
+      <div class="section-card" style="text-align: center;">
+        <div class="section-title" style="justify-content: center;">🔥 النتائج والترتيب</div>
+        <div style="font-size: 1.05rem; font-weight: 800; color: var(--violet); padding: 12px 0;">
+          ترقبوا الفائزين بالمراكز الأولى في الحفل ✨
+        </div>
       </div>
 
       <div class="section-card">
@@ -418,7 +393,6 @@
         </div>
       </div>
 
-      <!-- الصفوف الأولى-الرابعة: للعرض فقط، المعلم يضيف النقاط مباشرة من شاشته -->
       <div class="section-card" id="achievementsTeacherManagedCard" style="display:none;">
         <div class="locked-box">
           <div class="ic">👩‍🏫</div>
@@ -496,7 +470,6 @@
               <div class="student-id-stage" id="infoStage"></div>
               <div class="student-id-meta">
                 <div class="student-id-id"><span>ID</span><span id="infoId"></span></div>
-                <div class="student-id-rank" id="infoRank"></div>
               </div>
             </div>
           </div>
@@ -532,13 +505,6 @@
 </div>
 
 <script>
-  /* =========================================================================
-     مهم جدًا قبل النشر:
-     1) APPS_SCRIPT_URL -> نفس رابط تطبيق المشرفين بعد إضافة كل الإجراءات الجديدة
-     2) LOGO_SRC -> الشعار الداخلي بالتطبيق (شاشة الدخول + الهيدر) — منفصل عن أيقونات
-        الشاشة الرئيسية (icon-512/192/180.png) المحددة بأعلى الملف
-     3) عدّل CONTACTS بالأسفل ببياناتك الفعلية (رابط واتساب/هاتف/بريد)
-     ========================================================================= */
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVV1SDLMhie0fMAf2qfu-1wB5AmSvRl3u-T7JDm2wUzaut6I8Lo3NTMpd9P9wE706blA/exec';
   const STUDENT_APP_BASE_URL = 'https://faresmaqbool94-code.github.io/hawaya-student/';
   const LOGO_SRC = 'logo.png';
@@ -549,13 +515,11 @@
 
   document.querySelectorAll('.app-logo').forEach((img) => { img.src = LOGO_SRC; });
 
-  // تسجيل Service Worker — شرط أساسي ليعرض المتصفح زر التثبيت التلقائي (PWA)
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js').catch(() => {});
     });
   }
-
 
   // ====== نافذة تكبير صورة الإعلان ======
   const imageLightbox = document.getElementById('imageLightbox');
@@ -616,7 +580,7 @@
     }
   }
 
-  // ====== الجوائز — تُحمّل من الخادم، بآلية شراء فعلية ======
+  // ====== الجوائز ======
   let currentStudentBalance = 0;
 
   function renderRewards(rewards) {
@@ -662,8 +626,6 @@
     }
   }
 
-  // يظهر زر "تأكيد" جنب الزر المضغوط مباشرة بدل أي نافذة منبثقة. ضغط
-  // تأكيد ينفّذ onConfirm (لازم ترجع Promise وترمي خطأ لو فشلت العملية).
   function showInlineConfirm(triggerBtn, onConfirm) {
     if (triggerBtn.dataset.confirming === '1') return;
     triggerBtn.dataset.confirming = '1';
@@ -691,7 +653,6 @@
       confirmBtn.textContent = '...';
       try {
         await onConfirm();
-        // العملية نجحت — القائمة نفسها بتتحدث وتستبدل هذا الصف بالكامل
       } catch (err) {
         confirmBtn.disabled = false;
         confirmBtn.textContent = (err && err.message) ? err.message : 'فشل، حاول مجددًا';
@@ -725,7 +686,7 @@
     await loadMyPointsLog();
   }
 
-  // ====== نصيحة اليوم — آخر نصيحة مضافة من المشرف ======
+  // ====== نصيحة اليوم ======
   async function loadDailyTip() {
     const el = document.getElementById('dailyTipText');
     try {
@@ -736,35 +697,7 @@
     }
   }
 
-  function renderLeaderboard(list) {
-    const wrap = document.getElementById('leaderboardScroll');
-    if (!list || !list.length) {
-      wrap.innerHTML = '<p class="lb-empty">لا توجد بيانات كافية بعد</p>';
-      return;
-    }
-    wrap.innerHTML = list.map((s) => `
-      <div class="leader-card">
-        <div class="leader-rank ${s.rank === 1 ? 'top1' : ''}">#${s.rank}</div>
-        <div class="leader-photo" style="${s.imageUrl ? `background-image:url('${s.imageUrl}')` : ''}">${s.imageUrl ? '' : '🧒'}</div>
-        <div class="leader-name">${s.name || ''}</div>
-        <div class="leader-stage">${s.stage || ''}</div>
-      </div>
-    `).join('');
-  }
-
-  async function loadLeaderboard() {
-    const wrap = document.getElementById('leaderboardScroll');
-    wrap.innerHTML = '<p class="lb-empty">جاري التحميل...</p>';
-    try {
-      const data = await callAppsScript({ action: 'getLeaderboard', stage: currentStudentStage });
-      if (!data.success) { wrap.innerHTML = '<p class="lb-empty">تعذر تحميل الترتيب</p>'; return; }
-      renderLeaderboard(data.leaderboard);
-    } catch (_) {
-      wrap.innerHTML = '<p class="lb-empty">تعذر تحميل الترتيب</p>';
-    }
-  }
-
-  // ====== نقاطي — الإنجازات (مقفلة إلا بعد حضور مسائي + من 3:30 عصرًا لين 3 عصرًا اليوم التالي) ======
+  // ====== نقاطي — الإنجازات ======
   function renderDailyAchievements(daily) {
     const wrap = document.getElementById('dailyAchievementsList');
     wrap.innerHTML = daily.map((a) => `
@@ -794,7 +727,6 @@
   const YOUNG_GRADES = ['أول ابتدائي', 'ثاني ابتدائي', 'ثالث ابتدائي', 'رابع ابتدائي'];
   let currentStudentStage = '';
 
-  // مجموعة جوائز الطالب حسب مرحلته (نفس تقسيم الخادم)
   function getRewardGroupForStage(stage) {
     if (['أول ابتدائي', 'ثاني ابتدائي', 'ثالث ابتدائي', 'رابع ابتدائي'].indexOf(stage) !== -1) return 'ابتدائي_صغار';
     if (['خامس ابتدائي', 'سادس ابتدائي'].indexOf(stage) !== -1) return 'ابتدائي_كبار';
@@ -806,8 +738,6 @@
     const session = getSession();
     if (!session) return;
 
-    // الصفوف الأولى-الرابعة: نقاطهم يضيفها المعلم مباشرة من شاشته، فلا تحتاج
-    // قفل بالوقت ولا أي تفاعل هنا — فقط رسالة توضيحية + السجل بالأسفل كالعادة
     if (YOUNG_GRADES.indexOf(currentStudentStage) !== -1) {
       document.getElementById('achievementsLockedCard').style.display = 'none';
       document.getElementById('achievementsContent').style.display = 'none';
@@ -830,9 +760,7 @@
       document.getElementById('achievementsContent').style.display = 'block';
       renderDailyAchievements(data.daily);
       renderWeeklyAchievements(data.weekly);
-    } catch (_) {
-      // تجاهل بصمت — السجل والصفحات الثانية تبقى تعمل
-    }
+    } catch (_) {}
   }
 
   document.getElementById('confirmAchievementsBtn').addEventListener('click', async () => {
@@ -992,7 +920,7 @@
     } finally {
       btn.disabled = false;
       btn.textContent = '📷 تغيير الصورة';
-      e.target.value = ''; // يسمح باختيار نفس الملف مرة ثانية لو احتاج
+      e.target.value = '';
     }
   });
 
@@ -1035,7 +963,6 @@
     populateStudentData(data);
     resetPagesToHome();
     loadAnnouncements();
-    loadLeaderboard();
     loadRewards();
     loadDailyTip();
     loadAchievements();
@@ -1051,7 +978,6 @@
     document.getElementById('infoName').textContent = data.name;
     document.getElementById('infoStage').textContent = data.stage;
     document.getElementById('infoId').textContent = data.id;
-    document.getElementById('lbYourRank').textContent = data.rank ? ('· مركزك #' + data.rank) : '';
 
     const infoAvatar = document.getElementById('infoAvatar');
     if (data.imageUrl) {
@@ -1061,9 +987,7 @@
       infoAvatar.style.backgroundImage = '';
       infoAvatar.textContent = '🧒';
     }
-    document.getElementById('infoRank').textContent = data.rank ? ('#' + data.rank) : '—';
 
-    // باركود الحضور الشخصي — نفس الرابط المشفّر ببطاقته الأصلية بالضبط
     const session = getSession();
     const qrWrap = document.getElementById('myAttendanceQr');
     if (session && session.pw && qrWrap) {
@@ -1073,28 +997,25 @@
     }
   }
 
-  // ====== التنقل بين الصفحات: الانزلاق يكون بنفس جهة الأيقونة المضغوطة ======
+  // ====== التنقل بين الصفحات ======
   const panels = Array.from(document.querySelectorAll('.page-panel'));
   const navButtons = document.querySelectorAll('.nav-btn');
   let currentIndex = 0;
 
-  // ترتيب الأيقونات بالقائمة السفلية من اليمين لليسار (نفس ترتيب DOM بصفحة RTL):
-  // 0=الرئيسية (أقصى اليمين) ... 4=تابعنا (أقصى اليسار)
-  // فهرس أكبر = الأيقونة لجهة اليسار، فهرس أصغر = الأيقونة لجهة اليمين
   function goToPage(newIndex) {
     if (newIndex === currentIndex || !panels[newIndex]) return;
 
     const oldPanel = panels[currentIndex];
     const newPanel = panels[newIndex];
-    const targetIsToTheLeft = newIndex > currentIndex; // الأيقونة المضغوطة تقع يسار الحالية
+    const targetIsToTheLeft = newIndex > currentIndex;
 
-    const enterFrom = targetIsToTheLeft ? '-100%' : '100%'; // تدخل من نفس جهة الأيقونة
-    const exitTo = targetIsToTheLeft ? '100%' : '-100%';    // القديمة تخرج للجهة المعاكسة
+    const enterFrom = targetIsToTheLeft ? '-100%' : '100%';
+    const exitTo = targetIsToTheLeft ? '100%' : '-100%';
 
     newPanel.style.transition = 'none';
     newPanel.style.transform = 'translateX(' + enterFrom + ')';
     newPanel.style.display = 'block';
-    newPanel.getBoundingClientRect(); // فرض إعادة رسم قبل تفعيل الانتقال
+    newPanel.getBoundingClientRect();
     newPanel.style.transition = '';
 
     requestAnimationFrame(() => {
@@ -1113,7 +1034,6 @@
     navButtons.forEach((btn) => btn.classList.toggle('active', Number(btn.dataset.index) === newIndex));
   }
 
-  // يُستدعى عند كل دخول جديد (تسجيل دخول/تحديث جلسة) لإعادة كل شي لحالة الصفحة الرئيسية بدون أنيميشن
   function resetPagesToHome() {
     panels.forEach((p, i) => {
       p.style.transition = 'none';
@@ -1130,8 +1050,6 @@
     btn.addEventListener('click', () => {
       const idx = Number(btn.dataset.index);
       goToPage(idx);
-      // تبويب "نقاطي" (index 1) يحتاج فحص الحالة من جديد كل مرة يُفتح، عشان
-      // ينعكس فورًا أي حضور سُجّل بعد ما الطالب فتح التطبيق (باركود أو يدوي)
       if (idx === 1) {
         loadAchievements();
         loadMyPointsLog();
@@ -1139,7 +1057,7 @@
     });
   });
 
-  // ====== تحديث الرصيد والمركز يدويًا ======
+  // ====== تحديث الرصيد يدويًا ======
   document.getElementById('refreshBalanceBtn').addEventListener('click', async () => {
     const session = getSession();
     if (!session) return;
@@ -1152,9 +1070,7 @@
         populateStudentData(data);
         await loadRewards();
       }
-    } catch (_) {
-      // تجاهل بصمت — يحافظ على آخر رصيد معروض
-    }
+    } catch (_) {}
     btn.disabled = false;
     btn.textContent = '🔄 تحديث الرصيد';
   });
@@ -1165,7 +1081,7 @@
     location.reload();
   });
 
-  // ====== زر تثبيت التطبيق (PWA) — ظاهر دائمًا، يتعامل مع كل الحالات ======
+  // ====== زر تثبيت التطبيق ======
   const installBtn = document.getElementById('installBtn');
   const iosInstallOverlay = document.getElementById('iosInstallOverlay');
   const genericInstallOverlay = document.getElementById('genericInstallOverlay');
@@ -1173,7 +1089,6 @@
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   let deferredInstallPrompt = null;
 
-  // الحالة الوحيدة التي نخفي فيها الزر: التطبيق مثبّت فعليًا ومفتوح كتطبيق مستقل
   if (isStandalone) installBtn.classList.add('hidden');
 
   window.addEventListener('beforeinstallprompt', (e) => {
@@ -1201,7 +1116,7 @@
     genericInstallOverlay.classList.add('hidden');
   });
 
-  // ====== نموذج تسجيل الدخول اليدوي ======
+  // ====== نموذج تسجيل الدخول ======
   document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = document.getElementById('loginId').value.trim();
@@ -1231,11 +1146,10 @@
     }
   });
 
-  // ====== التحقق التلقائي عند فتح التطبيق ======
+  // ====== التحقق التلقائي ======
   async function init() {
     showLoading();
 
-    // 1) لو فُتح التطبيق من رابط الباركود (id & pw بالرابط) -> دخول تلقائي
     const params = new URLSearchParams(location.search);
     const urlId = params.get('id');
     const urlPw = params.get('pw');
@@ -1243,7 +1157,6 @@
     if (urlId && urlPw) {
       try {
         const data = await studentLogin(urlId, urlPw);
-        // تنظيف الرابط من البيانات الحساسة بعد المحاولة (نجحت أو فشلت)
         history.replaceState({}, document.title, location.pathname);
         if (data.success) {
           saveSession(urlId, urlPw);
@@ -1259,7 +1172,6 @@
       }
     }
 
-    // 2) لو فيه جلسة محفوظة بالمتصفح -> تحقق منها وحدّث الرصيد والمركز
     const session = getSession();
     if (session && session.id && session.pw) {
       try {
@@ -1277,7 +1189,6 @@
       }
     }
 
-    // 3) ما فيه جلسة ولا رابط باركود -> شاشة تسجيل دخول عادية
     showLogin();
   }
 
