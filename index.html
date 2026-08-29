@@ -229,34 +229,45 @@
 
   /* بطاقة بيانات الطالب */
   .student-id-card{
-    position:relative;border-radius:16px;overflow:hidden;
-    background:linear-gradient(135deg, #1A1430, var(--indigo) 40%, var(--violet) 75%, var(--pink) 110%);
-    padding:16px 18px;margin-top:4px;min-height:130px;
+    position:relative;border-radius:24px;overflow:hidden;
+    background:linear-gradient(145deg, #FFF8EE 0%, #FFF0F7 46%, #EEE8FA 100%);
+    border:2px solid rgba(104,69,154,.16);
+    box-shadow:0 18px 42px -22px rgba(104,69,154,.55);
+    padding:18px;margin-top:4px;min-height:220px;
   }
+  .student-id-card::before,.student-id-card::after{
+    content:'';position:absolute;border-radius:50%;pointer-events:none;
+  }
+  .student-id-card::before{width:150px;height:150px;background:rgba(246,82,154,.11);top:-78px;right:-56px;}
+  .student-id-card::after{width:125px;height:125px;background:rgba(255,168,38,.16);bottom:-72px;left:-42px;}
+  .membership-card-header{
+    position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;
+    gap:18px;padding-bottom:13px;margin-bottom:16px;border-bottom:1px solid rgba(104,69,154,.16);
+  }
+  .membership-title{font-family:'Baloo Bhaijaan 2',sans-serif;font-size:1.18rem;font-weight:800;color:var(--rowad-purple);}
+  .membership-title small{display:block;font-family:'Almarai',sans-serif;font-size:.68rem;color:var(--rowad-pink);margin-top:-2px;}
   .student-id-logo{
-    position:absolute;top:12px;right:14px;
-    height:38px;width:auto;border-radius:8px;
+    position:static;height:42px;max-width:92px;width:auto;object-fit:contain;
   }
   .student-id-card-inner{
-    display:flex;align-items:flex-start;gap:14px;
-    flex-direction:row-reverse;
+    position:relative;z-index:1;display:flex;align-items:flex-start;gap:17px;
   }
   .student-id-photo{
-    flex-shrink:0;width:90px;height:90px;border-radius:14px;
-    background-size:cover;background-position:center;background-color:rgba(255,255,255,.12);
-    border:2px solid rgba(255,255,255,.55);
-    display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:#fff;
+    flex-shrink:0;width:96px;height:112px;border-radius:20px;
+    background-size:cover;background-position:center;background-color:#fff;
+    border:4px solid #fff;box-shadow:0 10px 24px -12px rgba(53,40,104,.6);
+    display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:var(--rowad-purple);
   }
-  .student-id-info{flex:1;min-width:0;text-align:right;padding-top:48px;}
+  .student-id-info{flex:1;min-width:0;text-align:right;}
   .student-id-name{
-    font-weight:800;font-size:1.15rem;color:#fff;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:8px;
+    font-weight:800;font-size:1.08rem;color:var(--rowad-purple);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:9px;
   }
-  .student-id-stage{font-size:.82rem;font-weight:800;color:#1A1430;margin-bottom:6px;}
-  .student-id-meta{display:flex;gap:16px;align-items:center;}
-  .student-id-id{font-size:.82rem;font-weight:800;color:#1A1430;}
-  .student-id-id span{font-size:.82rem;font-weight:800;color:#1A1430;margin-right:2px;}
-  .student-id-rank{font-size:.82rem;font-weight:800;color:#1A1430;}
+  .student-detail-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid rgba(104,69,154,.10);}
+  .student-detail-label{font-size:.7rem;font-weight:700;color:#8D829D;}
+  .student-id-stage,.student-id-id,.student-id-rank{font-size:.79rem;font-weight:800;color:#33254B;}
+  .student-id-id span{font-size:.79rem;font-weight:800;color:#33254B;margin:0;}
+  .membership-card-footer{position:relative;z-index:1;margin-top:14px;height:5px;border-radius:999px;background:linear-gradient(90deg,var(--rowad-purple),var(--rowad-pink),var(--rowad-orange));}
 
   /* المعلومات / الرصيد */
   .balance-box{text-align:center;padding:10px 0 4px;}
@@ -530,21 +541,22 @@
         <div id="myAttendanceQr" style="display:flex;justify-content:center;margin:6px 0;"></div>
       </div>
       <div class="section-card">
-        <div class="section-title">بياناتي</div>
         <div class="student-id-card" id="studentIdCard">
-          <img class="student-id-logo" src="new.png" alt="هواية">
+          <div class="membership-card-header">
+            <div class="membership-title">بطاقة عضوية<small>رواد هواية</small></div>
+            <img class="student-id-logo" src="rowad-hawaya-logo.png" alt="رواد هواية">
+          </div>
           <div class="student-id-card-inner">
             <div class="student-id-photo" id="infoAvatar">🧒</div>
             <div class="student-id-info">
               <div class="student-id-name" id="infoName"></div>
-              <div class="student-id-stage" id="infoStage"></div>
-              <div class="student-id-meta">
-                <div class="student-id-id"><span>ID</span><span id="infoId"></span></div>
-                <div class="student-id-rank" id="infoRank"></div>
+              <div class="student-detail-row"><span class="student-detail-label">المرحلة الدراسية</span><div class="student-id-stage" id="infoStage"></div></div>
+              <div class="student-detail-row"><span class="student-detail-label">رقم الطالب</span><div class="student-id-id"><span id="infoId"></span></div></div>
+              <div class="student-detail-row"><span class="student-detail-label">المركز</span><div class="student-id-rank" id="infoRank"></div></div>
               </div>
             </div>
+          <div class="membership-card-footer"></div>
           </div>
-        </div>
         <div style="display:flex;justify-content:center;margin-top:12px;">
           <button type="button" id="changePhotoBtn" class="btn-secondary" style="width:auto;padding:8px 18px;font-size:.8rem;">📷 تغيير الصورة</button>
           <input type="file" id="changePhotoInput" accept="image/*" class="hidden">
