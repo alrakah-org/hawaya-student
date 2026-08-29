@@ -23,6 +23,9 @@
     --violet:#7C5BA6;
     --pink:#F178A8;
     --sun:#FFC83C;
+    --rowad-pink:#F6529A;
+    --rowad-orange:#FFA826;
+    --rowad-purple:#68459A;
     --bg:#F6F4FB;
     --card:#FFFFFF;
     --text:#2B2640;
@@ -132,6 +135,14 @@
   /* ===================== التطبيق الرئيسي ===================== */
   #appView{min-height:100vh;display:flex;flex-direction:column;}
 
+  .brand-logos{display:flex;align-items:center;justify-content:center;gap:12px;direction:rtl;}
+  .brand-logos .app-logo{max-height:68px;width:auto;object-fit:contain;}
+  .brand-logos .logo{margin:0;}
+  .brand-logos .rowad-logo{max-height:62px;max-width:132px;width:auto;object-fit:contain;}
+  .app-header .brand-logos{justify-content:flex-start;gap:9px;flex-shrink:0;}
+  .app-header .brand-logos .app-logo{height:46px;max-height:46px;}
+  .app-header .brand-logos .rowad-logo{height:42px;max-height:42px;max-width:88px;}
+
   /* الشريط العلوي: الشعار + ترحيب صغير بجانبه، مباشرة على خلفية الصفحة */
   .app-header{padding:14px 18px 6px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
   .header-logo{height:46px;width:auto;display:inline-block;flex-shrink:0;}
@@ -149,7 +160,10 @@
   .section-card{
     background:var(--card);border-radius:var(--radius);padding:22px 20px;
     box-shadow:0 14px 38px -16px rgba(53,40,104,.18);margin-bottom:16px;
+    border-top:3px solid rgba(246,82,154,.20);
   }
+  .section-card:nth-of-type(3n+2){border-top-color:rgba(255,168,38,.30);}
+  .section-card:nth-of-type(3n){border-top-color:rgba(104,69,154,.25);}
   .section-title{
     font-family:'Baloo Bhaijaan 2', sans-serif;font-weight:700;font-size:1.15rem;color:var(--indigo);margin:0 0 6px;
     display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;
@@ -342,7 +356,7 @@
 <!-- ===================== صفحة نهاية البرنامج ===================== -->
 <div id="programEndedView" class="hidden">
   <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;">
-    <img class="app-logo" alt="هواية" style="width:100%;max-width:190px;margin-bottom:28px;">
+    <div class="brand-logos" style="margin-bottom:28px;"><img class="app-logo" alt="هواية"><img class="rowad-logo" src="rowad-hawaya-logo.png" alt="رواد هواية"></div>
     <div style="font-size:3.2rem;margin-bottom:18px;">🎉</div>
     <h1 style="font-family:'Baloo Bhaijaan 2', sans-serif;font-weight:700;font-size:1.7rem;color:var(--indigo);margin:0 0 14px;line-height:1.5;">
       انتهى البرنامج!
@@ -364,7 +378,7 @@
 <!-- ===================== شاشة تسجيل الدخول ===================== -->
 <div id="loginView" class="hidden">
   <div class="login-card">
-    <img class="logo app-logo" alt="هواية">
+    <div class="brand-logos" style="margin-bottom:16px;"><img class="logo app-logo" alt="هواية"><img class="rowad-logo" src="rowad-hawaya-logo.png" alt="رواد هواية"></div>
     <div class="welcome-pill">أهلًا بك في هواية الصيفي ☀️</div>
     <h1>تسجيل الدخول</h1>
     <p class="subtitle">أدخل رقمك وكلمة السر من بطاقتك</p>
@@ -406,7 +420,7 @@
 <!-- ===================== التطبيق ===================== -->
 <div id="appView" class="hidden">
   <div class="app-header">
-    <img class="app-logo header-logo" alt="هواية">
+    <div class="brand-logos"><img class="app-logo header-logo" alt="هواية"><img class="rowad-logo" src="rowad-hawaya-logo.png" alt="رواد هواية"></div>
     <div class="header-welcome" id="headerWelcome"></div>
   </div>
 
@@ -555,7 +569,6 @@
   <div class="bottom-nav">
     <button class="nav-btn active" data-index="0" aria-label="الرئيسية"><img class="nav-ic-img" src="nav-home.png" alt=""></button>
     <button class="nav-btn" data-index="1" aria-label="نقاطي"><img class="nav-ic-img" src="nav-points.png" alt=""></button>
-    <button class="nav-btn" data-index="2" aria-label="الجوائز"><img class="nav-ic-img" src="nav-rewards.png" alt=""></button>
     <button class="nav-btn" data-index="3" aria-label="المعلومات"><img class="nav-ic-img" src="nav-info.png" alt=""></button>
     <button class="nav-btn" data-index="4" aria-label="تابعنا"><img class="nav-ic-img" src="nav-follow.png" alt=""></button>
   </div>
@@ -1104,7 +1117,6 @@
     loadAnnouncements();
     // العشرة الأوائل مخفية حاليًا (ترقبوا الحفل) — تعطيل تحميلها مؤقتًا
     // loadLeaderboard();
-    loadRewards();
     loadDailyTip();
     loadAchievements();
     loadMyPointsLog();
@@ -1220,7 +1232,6 @@
       const data = await studentLogin(session.id, session.pw);
       if (data.success) {
         populateStudentData(data);
-        await loadRewards();
       }
     } catch (_) {
       // تجاهل بصمت — يحافظ على آخر رصيد معروض
