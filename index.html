@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -269,6 +269,11 @@
     background:#FBFAFD;border:2px solid #EFEAF8;margin-bottom:10px;cursor:pointer;
   }
   .achievement-row.done{background:#EAF7EF;border-color:#BEE6CC;cursor:default;}
+  .achievement-checks{display:flex;gap:9px;align-items:center;}
+  .achievement-checks input{width:22px;height:22px;margin:0;accent-color:var(--violet);}
+  .group-member-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #EFEAF8;}
+  .group-member-row:last-child{border-bottom:none;}
+  .group-member-row.me{background:#F3F0FA;margin:0 -10px;padding:11px 10px;border-radius:12px;}
   .achievement-label{flex:1;font-weight:700;color:var(--indigo);font-size:.9rem;}
   .achievement-points{
     font-family:'Baloo Bhaijaan 2', sans-serif;font-weight:800;font-size:.82rem;color:#A9700A;
@@ -430,6 +435,11 @@
     <!-- 1) نقاطي -->
     <div class="page-panel" data-page="1">
 
+      <div class="section-card" id="myGroupCard">
+        <div class="section-title">👥 مجموعتي</div>
+        <div id="myGroupContent"><p class="lb-empty">جاري تحميل المجموعة...</p></div>
+      </div>
+
       <div class="section-card" id="achievementsLockedCard" style="display:none;">
         <div class="locked-box">
           <div class="ic">🔒</div>
@@ -449,7 +459,7 @@
       <div id="achievementsContent" style="display:none;">
         <div class="section-card">
           <div class="section-title">⭐ إنجازات اليوم</div>
-          <div class="section-sub">حدد كل إنجاز سويته، ثم اضغط تأكيد بالأسفل</div>
+          <div class="section-sub">يمكن تسجيل كل بند حتى ثلاث مرات يوميًا خلال فترة فتح الصفحة</div>
           <div id="dailyAchievementsList"></div>
         </div>
 
@@ -795,13 +805,18 @@
   // ====== نقاطي — الإنجازات (مقفلة إلا بعد حضور مسائي + من 3:30 عصرًا لين 3 عصرًا اليوم التالي) ======
   function renderDailyAchievements(daily) {
     const wrap = document.getElementById('dailyAchievementsList');
-    wrap.innerHTML = daily.map((a) => `
-      <label class="achievement-row ${a.done ? 'done' : ''}">
-        <input type="checkbox" class="achievement-checkbox" data-daily-key="${a.key}" ${a.done ? 'checked disabled' : ''}>
-        <span class="achievement-label">${a.label}${a.done ? ' (تم اليوم ✅)' : ''}</span>
+    wrap.innerHTML = daily.map((a) => {
+      const doneCount = a.doneCount || 0;
+      const maxChecks = Math.max(1, Math.min(4, Number(a.maxPerDay) || 1));
+      const checks = Array.from({ length: maxChecks }, (_, i) =>
+        `<input type="checkbox" class="achievement-checkbox" data-daily-key="${a.key}" ${i < doneCount ? 'checked disabled' : ''} aria-label="المرة ${i + 1}">`
+      ).join('');
+      return `<div class="achievement-row ${doneCount >= maxChecks ? 'done' : ''}">
+        <span class="achievement-label">${a.label}<small style="display:block;color:var(--text-muted);margin-top:3px;">تم ${doneCount} من ${maxChecks} اليوم</small></span>
+        <span class="achievement-checks">${checks}</span>
         <span class="achievement-points">+${a.points}</span>
-      </label>
-    `).join('');
+      </div>`;
+    }).join('');
   }
 
   function renderWeeklyAchievements(weekly) {
@@ -863,15 +878,39 @@
     }
   }
 
+  async function loadMyGroup() {
+    const session = getSession();
+    if (!session) return;
+    const wrap = document.getElementById('myGroupContent');
+    try {
+      const data = await callAppsScript({ action: 'getStudentGroupData', id: session.id });
+      if (!data.success || !data.hasGroup) {
+        wrap.innerHTML = '<p class="lb-empty">لم تتم إضافتك إلى مجموعة حتى الآن</p>';
+        return;
+      }
+      const group = data.group;
+      wrap.innerHTML = `<div style="font-weight:800;color:var(--violet);margin-bottom:8px;">${group.name} — مجموع النقاط: ${group.totalPoints}</div>` +
+        group.members.map((member, index) => `<div class="group-member-row ${String(member.id) === String(session.id) ? 'me' : ''}">
+          <span><b>${index + 1}. ${member.name}</b>${String(member.id) === String(session.id) ? ' (أنت)' : ''}</span>
+          <span class="achievement-points">${member.balance} نقطة</span>
+        </div>`).join('');
+    } catch (_) {
+      wrap.innerHTML = '<p class="lb-empty">تعذر تحميل المجموعة</p>';
+    }
+  }
+
   document.getElementById('confirmAchievementsBtn').addEventListener('click', async () => {
     const session = getSession();
     if (!session) return;
 
-    const dailyKeys = Array.from(document.querySelectorAll('.achievement-checkbox[data-daily-key]:checked')).map((el) => el.dataset.dailyKey);
+    const dailyCounts = {};
+    Array.from(document.querySelectorAll('.achievement-checkbox[data-daily-key]:checked:not(:disabled)')).forEach((el) => {
+      dailyCounts[el.dataset.dailyKey] = (dailyCounts[el.dataset.dailyKey] || 0) + 1;
+    });
     const weeklyKeys = Array.from(document.querySelectorAll('.achievement-checkbox[data-weekly-key]:checked')).map((el) => el.dataset.weeklyKey);
     const msgEl = document.getElementById('achievementsMsg');
 
-    if (!dailyKeys.length && !weeklyKeys.length) {
+    if (!Object.keys(dailyCounts).length && !weeklyKeys.length) {
       msgEl.style.color = 'var(--error)';
       msgEl.textContent = 'اختر إنجاز واحد على الأقل';
       return;
@@ -881,7 +920,7 @@
     btn.disabled = true; btn.textContent = 'جاري التأكيد...'; msgEl.textContent = '';
 
     try {
-      const result = await callAppsScript({ action: 'submitAchievements', id: session.id, dailyKeys: dailyKeys, weeklyKeys: weeklyKeys });
+      const result = await callAppsScript({ action: 'submitAchievements', id: session.id, password: session.pw, dailyCounts: dailyCounts, weeklyKeys: weeklyKeys });
       if (result.success) {
         msgEl.style.color = 'var(--success)';
         msgEl.textContent = result.pointsAdded > 0
@@ -1164,6 +1203,7 @@
       // ينعكس فورًا أي حضور سُجّل بعد ما الطالب فتح التطبيق (باركود أو يدوي)
       if (idx === 1) {
         loadAchievements();
+        loadMyGroup();
         loadMyPointsLog();
       }
     });
