@@ -296,6 +296,16 @@
   .achievement-row.done{background:#EAF7EF;border-color:#BEE6CC;cursor:default;}
   .achievement-checks{display:flex;gap:9px;align-items:center;}
   .achievement-checks input{width:22px;height:22px;margin:0;accent-color:var(--violet);}
+  .achievement-checks input{appearance:none;-webkit-appearance:none;border:2px solid #CFC5DE;border-radius:50%;background:#fff;display:grid;place-content:center;cursor:pointer;}
+  .achievement-checks input::before{content:'✓';font-size:14px;font-weight:900;color:#fff;transform:scale(0);transition:transform .12s ease;}
+  .achievement-checks input:checked{background:linear-gradient(135deg,var(--rowad-purple),var(--rowad-pink));border-color:transparent;}
+  .achievement-checks input:checked::before{transform:scale(1);}
+  .week-label{text-align:center;font-family:'Baloo Bhaijaan 2',sans-serif;font-size:1.25rem;font-weight:800;color:var(--rowad-purple);margin-bottom:10px;}
+  .day-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+  .day-tab{border:2px solid #E9E1F3;background:#fff;color:var(--rowad-purple);border-radius:14px;padding:9px 5px;font-weight:800;box-shadow:none;margin:0;}
+  .day-tab.active{background:linear-gradient(95deg,var(--rowad-purple),var(--rowad-pink));color:#fff;border-color:transparent;}
+  .day-tab:disabled{opacity:.38;cursor:not-allowed;}
+  .activity-details{font-size:.7rem;color:var(--text-muted);line-height:1.7;margin-top:3px;}
   .group-member-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #EFEAF8;}
   .group-member-row:last-child{border-bottom:none;}
   .group-member-row.me{background:#F3F0FA;margin:0 -10px;padding:11px 10px;border-radius:12px;}
@@ -447,11 +457,6 @@
       </div>
 
       <div class="section-card">
-        <div class="section-title">🔥 العشرة الأوائل</div>
-        <div class="leaderboard-hidden-msg">ترقبوا تكريم المراكز الأولى في الحفل 🙈</div>
-      </div>
-
-      <div class="section-card">
         <div class="section-title">نصيحة اليوم</div>
         <div class="section-sub" id="dailyTipText">جاري التحميل...</div>
       </div>
@@ -473,7 +478,7 @@
         </div>
       </div>
 
-      <!-- الصفوف الأولى-الرابعة: للعرض فقط، المعلم يضيف النقاط مباشرة من شاشته -->
+      <!-- الصفوف الأولى-الثالثة: المعلم يضيف النقاط مباشرة من شاشه -->
       <div class="section-card" id="achievementsTeacherManagedCard" style="display:none;">
         <div class="locked-box">
           <div class="ic">👩‍🏫</div>
@@ -483,24 +488,31 @@
 
       <div id="achievementsContent" style="display:none;">
         <div class="section-card">
-          <div class="section-title">⭐ إنجازات اليوم</div>
-          <div class="section-sub">يمكن تسجيل كل بند حتى ثلاث مرات يوميًا خلال فترة فتح الصفحة</div>
+          <div class="week-label" id="pointsWeekLabel">الأسبوع 1</div>
+          <div class="day-tabs" id="pointsDayTabs"></div>
+          <div class="section-title">⭐ إضافة النقاط</div>
+          <div class="section-sub" id="selectedDayLabel"></div>
           <div id="dailyAchievementsList"></div>
         </div>
 
-        <div class="section-card">
+        <div class="section-card hidden" id="legacyWeeklyCard">
           <div class="section-title">📅 إنجاز الأسبوع</div>
           <div class="section-sub">كل إنجاز يُختار مرة واحدة بالأسبوع — يتجدد الأحد الجاي</div>
           <div id="weeklyAchievementsList"></div>
         </div>
 
         <div class="section-card">
-          <button type="button" id="confirmAchievementsBtn">✅ تأكيد</button>
+          <button type="button" id="confirmAchievementsBtn">✅ حفظ النقاط</button>
           <p class="error" id="achievementsMsg"></p>
+        </div>
+        <div class="section-card">
+          <div class="section-title">👥 نشاط مجموعتي</div>
+          <div class="section-sub">الطلاب الذين سجلوا نقاطًا في اليوم المحدد</div>
+          <div id="groupDayActivity"></div>
         </div>
       </div>
 
-      <div class="section-card">
+      <div class="section-card hidden" id="legacyStudentLogCard">
         <div class="section-title">📜 سجل نقاطي</div>
         <div id="myPointsLogList"></div>
         <button type="button" class="refresh-btn" id="refreshLogBtn">🔄 تحديث السجل</button>
@@ -526,8 +538,8 @@
     </div>
 
     <!-- 3) المعلومات -->
-    <div class="page-panel" data-page="3">
-      <div class="section-card">
+    <div class="page-panel" data-page="3" id="studentInfoPage">
+      <div class="section-card hidden" id="infoBalanceCard">
         <div class="section-title">💰 رصيدي</div>
         <div class="balance-box">
           <div class="balance-num" id="infoBalance">0</div>
@@ -535,12 +547,12 @@
         </div>
         <button type="button" class="refresh-btn" id="refreshBalanceBtn">🔄 تحديث الرصيد</button>
       </div>
-      <div class="section-card" style="text-align:center;">
+      <div class="section-card" style="text-align:center;" id="attendanceQrCard">
         <div class="section-title">📷 باركود الحضور</div>
         <div class="section-sub">صوّر هذا الباركود بمحطة تسجيل الحضور — يعمل تمامًا مثل باركود بطاقتك</div>
         <div id="myAttendanceQr" style="display:flex;justify-content:center;margin:6px 0;"></div>
       </div>
-      <div class="section-card">
+      <div class="section-card" id="membershipCardSection">
         <div class="student-id-card" id="studentIdCard">
           <div class="membership-card-header">
             <div class="membership-title">بطاقة عضوية<small>رواد هواية</small></div>
@@ -552,7 +564,7 @@
               <div class="student-id-name" id="infoName"></div>
               <div class="student-detail-row"><span class="student-detail-label">المرحلة الدراسية</span><div class="student-id-stage" id="infoStage"></div></div>
               <div class="student-detail-row"><span class="student-detail-label">رقم الطالب</span><div class="student-id-id"><span id="infoId"></span></div></div>
-              <div class="student-detail-row"><span class="student-detail-label">المركز</span><div class="student-id-rank" id="infoRank"></div></div>
+              <div class="student-id-rank hidden" id="infoRank"></div>
               </div>
             </div>
           <div class="membership-card-footer"></div>
@@ -859,7 +871,7 @@
     }).join('');
   }
 
-  const YOUNG_GRADES = ['أول ابتدائي', 'ثاني ابتدائي', 'ثالث ابتدائي', 'رابع ابتدائي'];
+  const YOUNG_GRADES = ['أول ابتدائي', 'ثاني ابتدائي', 'ثالث ابتدائي'];
   let currentStudentStage = '';
 
   // مجموعة جوائز الطالب حسب مرحلته (نفس تقسيم الخادم)
@@ -870,7 +882,7 @@
     return 'ثانوي';
   }
 
-  async function loadAchievements() {
+  async function loadAchievementsLegacy() {
     const session = getSession();
     if (!session) return;
 
@@ -968,7 +980,7 @@
   });
 
   // ====== سجل نقاطي ======
-  async function loadMyPointsLog() {
+  async function loadMyPointsLogLegacy() {
     const session = getSession();
     if (!session) return;
     const wrap = document.getElementById('myPointsLogList');
@@ -1374,6 +1386,122 @@
     showLogin();
   }
 
+  // ====== النسخة الجديدة لإضافة النقاط حسب اليوم ======
+  let selectedPointsDayKey = '';
+
+  function renderDayPointItems(items) {
+    const wrap = document.getElementById('dailyAchievementsList');
+    wrap.innerHTML = (items || []).map((a) => {
+      const maxChecks = Math.max(1, Math.min(4, Number(a.maxChecks) || 1));
+      const count = Math.max(0, Number(a.count) || 0);
+      const circles = Array.from({ length: maxChecks }, (_, i) =>
+        `<input type="checkbox" class="achievement-checkbox" data-day-item="${a.key}" ${i < count ? 'checked' : ''} aria-label="المرة ${i + 1}">`
+      ).join('');
+      return `<div class="achievement-row">
+        <span class="achievement-label">${a.label}<small style="display:block;color:var(--text-muted);margin-top:3px;">${a.points} نقطة لكل اختيار</small></span>
+        <span class="achievement-checks">${circles}</span>
+      </div>`;
+    }).join('') || '<p class="lb-empty">لا توجد بنود مفعّلة حاليًا</p>';
+  }
+
+  function renderGroupDayActivity(items) {
+    const wrap = document.getElementById('groupDayActivity');
+    if (!items || !items.length) { wrap.innerHTML = '<p class="lb-empty">لا توجد نقاط مسجلة لأعضاء المجموعة في هذا اليوم</p>'; return; }
+    wrap.innerHTML = items.map((student, index) => `<div class="group-member-row">
+      <div style="flex:1;"><b>${index + 1}. ${student.name}</b><div class="activity-details">${student.items.map((x) => `${x.count} ${x.label}`).join(' · ')}</div></div>
+    </div>`).join('');
+  }
+
+  async function loadAchievements(dayKey) {
+    const session = getSession();
+    if (!session) return;
+    if (YOUNG_GRADES.indexOf(currentStudentStage) !== -1) {
+      document.getElementById('achievementsLockedCard').style.display = 'none';
+      document.getElementById('achievementsContent').style.display = 'none';
+      document.getElementById('achievementsTeacherManagedCard').style.display = 'block';
+      return;
+    }
+    document.getElementById('achievementsTeacherManagedCard').style.display = 'none';
+    try {
+      const data = await callAppsScript({ action: 'getDayPointsContext', id: session.id, password: session.pw, dayKey: dayKey || selectedPointsDayKey });
+      if (!data.success) {
+        document.getElementById('achievementsLockedCard').style.display = 'block';
+        document.getElementById('achievementsContent').style.display = 'none';
+        document.getElementById('achievementsLockedReason').textContent = data.error || 'الصفحة غير متاحة الآن';
+        return;
+      }
+      selectedPointsDayKey = data.selectedDay.key;
+      document.getElementById('achievementsLockedCard').style.display = 'none';
+      document.getElementById('achievementsContent').style.display = 'block';
+      document.getElementById('pointsWeekLabel').textContent = data.weekLabel;
+      document.getElementById('selectedDayLabel').textContent = data.selectedDay.label + ' — ' + data.selectedDay.date;
+      document.getElementById('pointsDayTabs').innerHTML = data.days.map((d) => `<button type="button" class="day-tab ${d.key === selectedPointsDayKey ? 'active' : ''}" data-points-day="${d.key}" ${d.enabled ? '' : 'disabled'}>${d.label}</button>`).join('');
+      renderDayPointItems(data.items);
+      renderGroupDayActivity(data.groupActivity);
+    } catch (_) {
+      document.getElementById('achievementsLockedCard').style.display = 'block';
+      document.getElementById('achievementsContent').style.display = 'none';
+      document.getElementById('achievementsLockedReason').textContent = 'تعذر الاتصال، حاول مرة أخرى';
+    }
+  }
+
+  document.getElementById('pointsDayTabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-points-day]');
+    if (btn && !btn.disabled) loadAchievements(btn.dataset.pointsDay);
+  });
+
+  // الالتقاط يمنع معالج التأكيد القديم ويستخدم حفظ اليوم الجديد فقط.
+  document.getElementById('confirmAchievementsBtn').addEventListener('click', async (e) => {
+    e.stopImmediatePropagation();
+    const session = getSession();
+    if (!session) return;
+    const counts = {};
+    document.querySelectorAll('[data-day-item]').forEach((box) => {
+      if (!(box.dataset.dayItem in counts)) counts[box.dataset.dayItem] = 0;
+      if (box.checked) counts[box.dataset.dayItem]++;
+    });
+    const btn = e.currentTarget;
+    const msg = document.getElementById('achievementsMsg');
+    btn.disabled = true; btn.textContent = 'جاري الحفظ...'; msg.textContent = '';
+    try {
+      const result = await callAppsScript({ action: 'saveDayPoints', id: session.id, password: session.pw, dayKey: selectedPointsDayKey, counts: counts });
+      msg.style.color = result.success ? 'var(--success)' : 'var(--error)';
+      msg.textContent = result.success ? (result.modifiedOtherDay ? '✅ تم الحفظ، وسُجل أن التعديل تم في يوم آخر' : '✅ تم حفظ النقاط') : (result.error || 'تعذر الحفظ');
+      if (result.success) { await loadAchievements(selectedPointsDayKey); await loadMyPointsLog(); }
+    } catch (_) { msg.style.color = 'var(--error)'; msg.textContent = 'حدث خطأ في الاتصال'; }
+    finally { btn.disabled = false; btn.textContent = '✅ حفظ النقاط'; }
+  }, true);
+
+  async function loadMyPointsLog() {
+    const session = getSession();
+    if (!session) return;
+    const wrap = document.getElementById('myPointsLogList');
+    wrap.innerHTML = '<p class="lb-empty">جاري التحميل...</p>';
+    try {
+      const data = await callAppsScript({ action: 'getStudentDetailedPointsLog', id: session.id });
+      const log = data.success ? data.log : [];
+      if (!log.length) { wrap.innerHTML = '<p class="lb-empty">لا توجد نقاط مسجلة بعد</p>'; return; }
+      wrap.innerHTML = log.map((entry) => `<div class="log-row">
+        <div><div class="log-reason">${entry.count} ${entry.label}</div><div class="log-date">${entry.date}${entry.modifiedOtherDay ? ` · عُدلت في يوم آخر (${entry.editDate})` : ''}</div></div>
+        <span class="log-amount">${entry.total}</span>
+      </div>`).join('');
+    } catch (_) { wrap.innerHTML = '<p class="lb-empty">تعذر تحميل السجل</p>'; }
+  }
+
+  function setupStudentInfoLayout() {
+    const page = document.getElementById('studentInfoPage');
+    const membership = document.getElementById('membershipCardSection');
+    const qr = document.getElementById('attendanceQrCard');
+    const logCard = document.getElementById('legacyStudentLogCard');
+    if (page && membership && qr && logCard) {
+      page.insertBefore(membership, page.firstChild);
+      membership.insertAdjacentElement('afterend', qr);
+      qr.insertAdjacentElement('afterend', logCard);
+      logCard.classList.remove('hidden');
+    }
+  }
+
+  setupStudentInfoLayout();
   init();
   } // نهاية else (PROGRAM_ENDED)
 </script>
