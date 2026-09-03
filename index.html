@@ -1389,13 +1389,13 @@
   // ====== النسخة الجديدة لإضافة النقاط حسب اليوم ======
   let selectedPointsDayKey = '';
 
-  function renderDayPointItems(items, locked) {
+  function renderDayPointItems(items) {
     const wrap = document.getElementById('dailyAchievementsList');
     wrap.innerHTML = (items || []).map((a) => {
       const maxChecks = Math.max(1, Math.min(4, Number(a.maxChecks) || 1));
       const count = Math.max(0, Number(a.count) || 0);
       const circles = Array.from({ length: maxChecks }, (_, i) =>
-        `<input type="checkbox" class="achievement-checkbox" data-day-item="${a.key}" ${i < count ? 'checked' : ''} ${locked ? 'disabled' : ''} aria-label="المرة ${i + 1}">`
+        `<input type="checkbox" class="achievement-checkbox" data-day-item="${a.key}" ${i < count ? 'checked' : ''} aria-label="المرة ${i + 1}">`
       ).join('');
       return `<div class="achievement-row">
         <span class="achievement-label">${a.label}<small style="display:block;color:var(--text-muted);margin-top:3px;">${a.points} نقطة لكل اختيار</small></span>
@@ -1436,14 +1436,14 @@
       document.getElementById('pointsWeekLabel').textContent = data.weekLabel;
       document.getElementById('selectedDayLabel').textContent = data.selectedDay.label + ' — ' + data.selectedDay.date;
       document.getElementById('pointsDayTabs').innerHTML = data.days.map((d) => `<button type="button" class="day-tab ${d.key === selectedPointsDayKey ? 'active' : ''}" data-points-day="${d.key}" ${d.enabled ? '' : 'disabled'}>${d.label}</button>`).join('');
-      renderDayPointItems(data.items, data.submitted);
+      renderDayPointItems(data.items);
       renderGroupDayActivity(data.groupActivity);
       document.getElementById('pointsDayTabs').style.display = 'none';
       const saveBtn = document.getElementById('confirmAchievementsBtn');
-      saveBtn.disabled = Boolean(data.submitted);
-      saveBtn.textContent = data.submitted ? '🔒 تم حفظ نقاط هذا اليوم' : '✅ حفظ النقاط';
+      saveBtn.disabled = false;
+      saveBtn.textContent = '✅ حفظ النقاط';
       const statusMsg = document.getElementById('achievementsMsg');
-      if (data.submitted) { statusMsg.style.color = 'var(--success)'; statusMsg.textContent = 'تم الحفظ ولا يمكن تعديل نقاط هذا اليوم'; }
+      statusMsg.textContent = '';
     } catch (_) {
       document.getElementById('achievementsLockedCard').style.display = 'block';
       document.getElementById('achievementsContent').style.display = 'none';
@@ -1475,7 +1475,7 @@
       msg.textContent = result.success ? (result.modifiedOtherDay ? '✅ تم الحفظ، وسُجل أن التعديل تم في يوم آخر' : '✅ تم حفظ النقاط') : (result.error || 'تعذر الحفظ');
       if (result.success) { await loadAchievements(); await loadMyPointsLog(); }
     } catch (_) { msg.style.color = 'var(--error)'; msg.textContent = 'حدث خطأ في الاتصال'; }
-    finally { if (!btn.textContent.includes('تم حفظ نقاط')) { btn.disabled = false; btn.textContent = '✅ حفظ النقاط'; } }
+    finally { btn.disabled = false; btn.textContent = '✅ حفظ النقاط'; }
   }, true);
 
   async function loadMyPointsLog() {
