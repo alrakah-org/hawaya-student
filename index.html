@@ -926,7 +926,7 @@
         return;
       }
       const group = data.group;
-      wrap.innerHTML = `<div style="font-weight:800;color:var(--violet);margin-bottom:8px;">${group.name} — مجموع النقاط: ${group.totalPoints}</div>` +
+      wrap.innerHTML = `<div style="font-weight:800;color:var(--violet);margin-bottom:8px;">${group.name}</div>` +
         group.members.map((member, index) => `<div class="group-member-row ${String(member.id) === String(session.id) ? 'me' : ''}">
           <span><b>${index + 1}. ${member.name}</b>${String(member.id) === String(session.id) ? ' (أنت)' : ''}</span>
           <span class="achievement-points">${member.balance} نقطة</span>
