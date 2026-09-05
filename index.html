@@ -49,6 +49,13 @@
   }
   .hidden{display:none !important;}
 
+  /* ===================== انترو التطبيق ===================== */
+  #appIntro{
+    position:fixed;inset:0;z-index:9999;background:#6d60bd;
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+  }
+  #appIntro video{width:100%;height:100%;object-fit:cover;display:block;}
+
   /* ===================== شاشة التحميل ===================== */
   #loadingView{
     min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
@@ -374,6 +381,13 @@
 </head>
 <body>
 
+<!-- يظهر مرة واحدة عند فتح التطبيق، ويعمل صامتًا -->
+<div id="appIntro">
+  <video id="appIntroVideo" autoplay muted playsinline preload="auto" aria-label="مقدمة تطبيق هواية">
+    <source src="intro.mp4?v=20260905b" type="video/mp4">
+  </video>
+</div>
+
 <!-- ===================== صفحة نهاية البرنامج ===================== -->
 <div id="programEndedView" class="hidden">
   <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;">
@@ -608,7 +622,7 @@
      ========================================================================= */
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVV1SDLMhie0fMAf2qfu-1wB5AmSvRl3u-T7JDm2wUzaut6I8Lo3NTMpd9P9wE706blA/exec';
   const STUDENT_APP_BASE_URL = 'https://faresmaqbool94-code.github.io/hawaya-student/';
-  const LOGO_SRC = 'logo.png';
+  const LOGO_SRC = 'logo.png?v=20260905';
   const CLOUDINARY_CLOUD_NAME = 'dhv0ypi5d';
   const CLOUDINARY_UPLOAD_PRESET = 'hawaya_upload';
   const CLOUDINARY_UPLOAD_URL = 'https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD_NAME + '/image/upload';
@@ -619,6 +633,19 @@
   const PROGRAM_ENDED = false;
 
   document.querySelectorAll('.app-logo').forEach((img) => { img.src = LOGO_SRC; });
+
+  const appIntro = document.getElementById('appIntro');
+  const appIntroVideo = document.getElementById('appIntroVideo');
+  function closeAppIntro() {
+    if (!appIntro || appIntro.classList.contains('hidden')) return;
+    appIntro.classList.add('hidden');
+    try { appIntroVideo.pause(); } catch (_) {}
+  }
+  appIntroVideo.addEventListener('ended', closeAppIntro);
+  appIntroVideo.addEventListener('error', closeAppIntro);
+  setTimeout(closeAppIntro, 6500);
+  const playAttempt = appIntroVideo.play();
+  if (playAttempt && typeof playAttempt.catch === 'function') playAttempt.catch(closeAppIntro);
 
   if (PROGRAM_ENDED) {
     document.getElementById('programEndedView').classList.remove('hidden');
@@ -844,7 +871,7 @@
     const wrap = document.getElementById('dailyAchievementsList');
     wrap.innerHTML = daily.map((a) => {
       const doneCount = a.doneCount || 0;
-      const maxChecks = Math.max(1, Math.min(4, Number(a.maxPerDay) || 1));
+      const maxChecks = Math.max(1, Math.min(20, Number(a.maxPerDay) || 1));
       const checks = Array.from({ length: maxChecks }, (_, i) =>
         `<input type="checkbox" class="achievement-checkbox" data-daily-key="${a.key}" ${i < doneCount ? 'checked disabled' : ''} aria-label="المرة ${i + 1}">`
       ).join('');
@@ -1392,13 +1419,13 @@
   function renderDayPointItems(items) {
     const wrap = document.getElementById('dailyAchievementsList');
     wrap.innerHTML = (items || []).map((a) => {
-      const maxChecks = Math.max(1, Math.min(4, Number(a.maxChecks) || 1));
+      const maxChecks = Math.max(1, Math.min(20, Number(a.maxChecks) || 1));
       const count = Math.max(0, Number(a.count) || 0);
       const circles = Array.from({ length: maxChecks }, (_, i) =>
-        `<input type="checkbox" class="achievement-checkbox" data-day-item="${a.key}" ${i < count ? 'checked' : ''} aria-label="المرة ${i + 1}">`
+        `<input type="checkbox" class="achievement-checkbox" data-day-item="${a.key}" ${i < count ? 'checked disabled' : ''} aria-label="المرة ${i + 1}${i < count ? ' — محفوظة' : ''}">`
       ).join('');
       return `<div class="achievement-row">
-        <span class="achievement-label">${a.label}<small style="display:block;color:var(--text-muted);margin-top:3px;">${a.points} نقطة لكل اختيار</small></span>
+        <span class="achievement-label">${a.label}<small style="display:block;color:var(--text-muted);margin-top:3px;">${a.points} نقطة لكل دائرة · الرصيد أسبوعي</small></span>
         <span class="achievement-checks">${circles}</span>
       </div>`;
     }).join('') || '<p class="lb-empty">لا توجد بنود مفعّلة حاليًا</p>';
