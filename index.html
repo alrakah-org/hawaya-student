@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>هواية الصيفي - الطالب</title>
+<title>هواية</title>
 <link rel="icon" type="image/png" href="icon-512.png">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#352868">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="هواية الصيفي">
+<meta name="apple-mobile-web-app-title" content="هواية">
+<meta name="application-name" content="هواية">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@600;700;800&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   :root{
     --blue:#2F6FBF;
@@ -147,8 +147,8 @@
   .brand-logos .logo{margin:0;}
   .brand-logos .rowad-logo{max-height:62px;max-width:132px;width:auto;object-fit:contain;}
   .app-header .brand-logos{justify-content:flex-start;gap:9px;flex-shrink:0;}
-  .app-header .brand-logos .app-logo{height:46px;max-height:46px;}
-  .app-header .brand-logos .rowad-logo{height:42px;max-height:42px;max-width:88px;}
+  .app-header .brand-logos .app-logo{height:36px;max-height:36px;cursor:pointer;}
+  .app-header .brand-logos .rowad-logo{height:34px;max-height:34px;max-width:76px;}
 
   /* الشريط العلوي: الشعار + ترحيب صغير بجانبه، مباشرة على خلفية الصفحة */
   .app-header{padding:14px 18px 6px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
@@ -313,6 +313,10 @@
   .day-tab.active{background:linear-gradient(95deg,var(--rowad-purple),var(--rowad-pink));color:#fff;border-color:transparent;}
   .day-tab:disabled{opacity:.38;cursor:not-allowed;}
   .activity-details{font-size:.7rem;color:var(--text-muted);line-height:1.7;margin-top:3px;}
+  .attendance-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+  .attendance-actions button{margin:0;padding:12px 8px;font-size:.86rem;}
+  .attendance-normal-btn{background:linear-gradient(95deg,var(--blue),var(--violet));}
+  .attendance-early-btn{background:linear-gradient(95deg,var(--rowad-pink),var(--rowad-purple));}
   .group-member-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #EFEAF8;}
   .group-member-row:last-child{border-bottom:none;}
   .group-member-row.me{background:#F3F0FA;margin:0 -10px;padding:11px 10px;border-radius:12px;}
@@ -414,7 +418,6 @@
 <div id="loginView" class="hidden">
   <div class="login-card">
     <div class="brand-logos" style="margin-bottom:16px;"><img class="logo app-logo" alt="هواية"><img class="rowad-logo" src="rowad-hawaya-logo.png" alt="رواد هواية"></div>
-    <div class="welcome-pill">أهلًا بك في هواية الصيفي ☀️</div>
     <h1>تسجيل الدخول</h1>
     <p class="subtitle">أدخل رقمك وكلمة السر من بطاقتك</p>
     <form id="loginForm">
@@ -455,7 +458,7 @@
 <!-- ===================== التطبيق ===================== -->
 <div id="appView" class="hidden">
   <div class="app-header">
-    <div class="brand-logos"><img class="app-logo header-logo" alt="هواية"><img class="rowad-logo" src="rowad-hawaya-logo.png" alt="رواد هواية"></div>
+    <div class="brand-logos"><img class="app-logo header-logo" id="appRefreshLogo" role="button" tabindex="0" title="تحديث التطبيق" alt="هواية — اضغط للتحديث"><img class="rowad-logo" src="rowad-hawaya-logo.png" alt="رواد هواية"></div>
     <div class="header-welcome" id="headerWelcome"></div>
   </div>
 
@@ -482,6 +485,16 @@
       <div class="section-card" id="myGroupCard">
         <div class="section-title">👥 مجموعتي</div>
         <div id="myGroupContent"><p class="lb-empty">جاري تحميل المجموعة...</p></div>
+      </div>
+
+      <div class="section-card" id="studentAttendanceCard">
+        <div class="section-title">✅ تسجيل الحضور</div>
+        <div class="section-sub" id="studentAttendanceStatus">جاري التحقق من وقت الحضور...</div>
+        <div class="attendance-actions" id="studentAttendanceActions" style="display:none;">
+          <button type="button" class="attendance-early-btn" data-student-attendance="early">الحضور المبكر</button>
+          <button type="button" class="attendance-normal-btn" data-student-attendance="normal">الحضور العادي</button>
+        </div>
+        <p class="error" id="studentAttendanceMsg"></p>
       </div>
 
       <div class="section-card" id="achievementsLockedCard" style="display:none;">
@@ -561,11 +574,6 @@
         </div>
         <button type="button" class="refresh-btn" id="refreshBalanceBtn">🔄 تحديث الرصيد</button>
       </div>
-      <div class="section-card" style="text-align:center;" id="attendanceQrCard">
-        <div class="section-title">📷 باركود الحضور</div>
-        <div class="section-sub">صوّر هذا الباركود بمحطة تسجيل الحضور — يعمل تمامًا مثل باركود بطاقتك</div>
-        <div id="myAttendanceQr" style="display:flex;justify-content:center;margin:6px 0;"></div>
-      </div>
       <div class="section-card" id="membershipCardSection">
         <div class="student-id-card" id="studentIdCard">
           <div class="membership-card-header">
@@ -633,6 +641,15 @@
   const PROGRAM_ENDED = false;
 
   document.querySelectorAll('.app-logo').forEach((img) => { img.src = LOGO_SRC; });
+
+  const appRefreshLogo = document.getElementById('appRefreshLogo');
+  function refreshStudentApp() { location.reload(); }
+  if (appRefreshLogo) {
+    appRefreshLogo.addEventListener('click', refreshStudentApp);
+    appRefreshLogo.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); refreshStudentApp(); }
+    });
+  }
 
   const appIntro = document.getElementById('appIntro');
   const appIntroVideo = document.getElementById('appIntroVideo');
@@ -1170,6 +1187,7 @@
     // loadLeaderboard();
     loadDailyTip();
     loadAchievements();
+    loadStudentAttendanceStatus();
     loadMyPointsLog();
   }
 
@@ -1195,15 +1213,68 @@
     }
     document.getElementById('infoRank').textContent = data.rank ? ('#' + data.rank) : '—';
 
-    // باركود الحضور الشخصي — نفس الرابط المشفّر ببطاقته الأصلية بالضبط
+  }
+
+  async function loadStudentAttendanceStatus() {
     const session = getSession();
-    const qrWrap = document.getElementById('myAttendanceQr');
-    if (session && session.pw && qrWrap) {
-      qrWrap.innerHTML = '';
-      const loginLink = STUDENT_APP_BASE_URL + '?id=' + data.id + '&pw=' + session.pw;
-      new QRCode(qrWrap, { text: loginLink, width: 160, height: 160, colorDark: '#15101F', colorLight: '#ffffff' });
+    if (!session) return;
+    const status = document.getElementById('studentAttendanceStatus');
+    const actions = document.getElementById('studentAttendanceActions');
+    const msg = document.getElementById('studentAttendanceMsg');
+    if (!status || !actions) return;
+    actions.style.display = 'none';
+    status.textContent = 'جاري التحقق من وقت الحضور...';
+    if (msg) msg.textContent = '';
+    try {
+      const data = await callAppsScript({ action: 'getStudentAttendanceStatus', id: session.id, password: session.pw });
+      if (!data.success) {
+        status.textContent = data.error || 'تعذر التحقق من الحضور';
+        return;
+      }
+      if (data.alreadyMarked) {
+        status.textContent = 'تم تسجيل حضورك اليوم بالفعل ✅';
+        return;
+      }
+      if (!data.allowed) {
+        status.textContent = data.reason || 'تسجيل الحضور مقفل الآن';
+        return;
+      }
+      status.textContent = 'اختر نوع حضورك — لا يمكن تغيير الاختيار بعد التسجيل';
+      actions.style.display = 'grid';
+    } catch (_) {
+      status.textContent = 'تعذر الاتصال، حاول تحديث التطبيق';
     }
   }
+
+  document.getElementById('studentAttendanceActions').addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-student-attendance]');
+    if (!btn) return;
+    const tier = btn.dataset.studentAttendance;
+    const label = tier === 'early' ? 'الحضور المبكر' : 'الحضور العادي';
+    if (!confirm('تأكيد تسجيل ' + label + '؟ لا يمكن تغيير الاختيار بعد التسجيل.')) return;
+    const session = getSession();
+    if (!session) return;
+    const buttons = document.querySelectorAll('[data-student-attendance]');
+    const msg = document.getElementById('studentAttendanceMsg');
+    buttons.forEach((x) => { x.disabled = true; });
+    msg.textContent = 'جاري تسجيل الحضور...';
+    try {
+      const result = await callAppsScript({ action: 'studentMarkAttendance', id: session.id, password: session.pw, tier: tier });
+      msg.style.color = result.success ? 'var(--success)' : 'var(--error)';
+      msg.textContent = result.success ? ('✅ تم تسجيل ' + label + ' وإضافة ' + result.pointsAdded + ' نقطة') : (result.error || 'تعذر تسجيل الحضور');
+      if (result.success) {
+        document.getElementById('studentAttendanceActions').style.display = 'none';
+        document.getElementById('studentAttendanceStatus').textContent = 'تم تسجيل حضورك اليوم بالفعل ✅';
+        const refreshed = await studentLogin(session.id, session.pw);
+        if (refreshed.success) populateStudentData(refreshed);
+      }
+    } catch (_) {
+      msg.style.color = 'var(--error)';
+      msg.textContent = 'حدث خطأ في الاتصال';
+    } finally {
+      buttons.forEach((x) => { x.disabled = false; });
+    }
+  });
 
   // ====== التنقل بين الصفحات: الانزلاق يكون بنفس جهة الأيقونة المضغوطة ======
   const panels = Array.from(document.querySelectorAll('.page-panel'));
@@ -1266,6 +1337,7 @@
       // ينعكس فورًا أي حضور سُجّل بعد ما الطالب فتح التطبيق (باركود أو يدوي)
       if (idx === 1) {
         loadAchievements();
+        loadStudentAttendanceStatus();
         loadMyGroup();
         loadMyPointsLog();
       }
@@ -1524,12 +1596,10 @@
   function setupStudentInfoLayout() {
     const page = document.getElementById('studentInfoPage');
     const membership = document.getElementById('membershipCardSection');
-    const qr = document.getElementById('attendanceQrCard');
     const logCard = document.getElementById('legacyStudentLogCard');
-    if (page && membership && qr && logCard) {
+    if (page && membership && logCard) {
       page.insertBefore(membership, page.firstChild);
-      membership.insertAdjacentElement('afterend', qr);
-      qr.insertAdjacentElement('afterend', logCard);
+      membership.insertAdjacentElement('afterend', logCard);
       logCard.classList.remove('hidden');
     }
   }
